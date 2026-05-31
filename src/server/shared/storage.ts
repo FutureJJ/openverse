@@ -4,7 +4,10 @@ import { HostPort } from "@/server/shared/ports";
 import type { BiomesStorage } from "@/server/shared/storage/biomes";
 import { createCopyOnWriteStorage } from "@/server/shared/storage/copy_on_write";
 import { getFirebaseBackedStorage } from "@/server/shared/storage/firestore";
-import { createInMemoryStorage } from "@/server/shared/storage/memory";
+import {
+  EmptyBackingStore,
+  createInMemoryStorage,
+} from "@/server/shared/storage/memory";
 import {
   persistBackingStorage,
   setupStorageDir,
@@ -181,11 +184,29 @@ export async function createStorageBackend(
   storageMode: StorageMode,
   copyOnWriteSnapshot?: string
 ) {
+  // In Openverse the default modes no longer fall back to a production
+  // Firestore. Use USE_FIRESTORE=1 plus a configured Firebase project to
+  // opt into the original Biomes behavior.
+  const allowFirestore = process.env.USE_FIRESTORE === "1";
+  const productionBacking = allowFirestore
+    ? getFirebaseBackedStorage()
+    : new EmptyBackingStore();
   switch (storageMode) {
     case "copy-on-write":
-      log.info("STORAGE MODE: Copy-on-write backed by production Firestore");
-      return createCopyOnWriteStorage(getFirebaseBackedStorage());
+      log.info(
+        allowFirestore
+          ? "STORAGE MODE: Copy-on-write backed by production Firestore"
+          : "STORAGE MODE: Copy-on-write over empty backing (in-memory only)"
+      );
+      return createCopyOnWriteStorage(productionBacking as any);
     case "firestore":
+      if (!allowFirestore) {
+        log.error(
+          "STORAGE MODE 'firestore' requested but USE_FIRESTORE is not set. " +
+            "Falling back to in-memory storage."
+        );
+        return createInMemoryStorage();
+      }
       if (!isRunningOnKubernetes()) {
         log.error("WARNING WARNING WARNING: USING PRODUCTION STORAGE LOCALLY!");
       } else {
@@ -193,11 +214,15 @@ export async function createStorageBackend(
       }
       return getFirebaseBackedStorage();
     case "snapshot":
-      log.warn("STORAGE MODE: Snapshot-backed");
+      log.warn(
+        allowFirestore
+          ? "STORAGE MODE: Snapshot-backed (file CoW over Firestore)"
+          : "STORAGE MODE: Snapshot-backed (file CoW over empty backing)"
+      );
       return createCopyOnWriteStorage(
         persistBackingStorage(
           await setupStorageDir(copyOnWriteSnapshot || "default"),
-          getFirebaseBackedStorage()
+          productionBacking as any
         )
       );
     case "memory":

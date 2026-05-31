@@ -10,7 +10,7 @@ import type {
 } from "@/server/shared/storage/biomes";
 import { createCopyOnWriteStorage } from "@/server/shared/storage/copy_on_write";
 
-class EmptyBackingCollection<T = BiomesStorage.DocumentData>
+export class EmptyBackingCollection<T = BiomesStorage.DocumentData>
   implements BackingCollection<T>
 {
   constructor(readonly id: StoragePath) {}
@@ -33,7 +33,7 @@ class EmptyBackingCollection<T = BiomesStorage.DocumentData>
   }
 }
 
-class EmptyBackingStore implements BackingStore {
+export class EmptyBackingStore implements BackingStore {
   collection(path: StoragePath): BackingCollection {
     return new EmptyBackingCollection(path);
   }
