@@ -103,19 +103,29 @@ class TableConnectionImpl {
   }
 }
 
+// No-op TableConnection used when BigQuery is not configured (the default
+// for self-hosted Openverse). Insertions are dropped silently.
+class NoopTableConnection implements TableConnection {
+  readonly pendingSize = 0;
+  insert(_row: Row) {
+    // ignored
+  }
+}
+
 export class BigQueryConnection {
   private readonly tables: Map<string, TableConnectionImpl> = new Map();
+  private readonly noopTable = new NoopTableConnection();
   private bigQuery?: BigQuery;
+  private readonly enabled: boolean;
 
   constructor() {
-    // We use the "legacy streaming API" because the node client supports JSON
-    // input, as opposed to protobuf for the new BigQuery Storage Write API.
-    // This page does a good job of describing the difference:
-    //   https://cloud.google.com/blog/topics/developers-practitioners/bigquery-write-api-explained-overview-write-api
-    // But essentially, we don't get guaranteed write once, and it costs more.
-    // If these things matter more in the future, e.g. because volume increases,
-    // we can look at switching.
-    this.bigQuery = new BigQuery();
+    // BigQuery is opt-in for Openverse: set ENABLE_BIGQUERY=1 alongside the
+    // standard Google Cloud auth env vars to send event rows. Without it,
+    // analytics writes are dropped on the floor.
+    this.enabled = process.env.ENABLE_BIGQUERY === "1";
+    if (this.enabled) {
+      this.bigQuery = new BigQuery();
+    }
   }
 
   // Returns an interface enabling rows of data to be pushed to a table. The
@@ -123,8 +133,8 @@ export class BigQueryConnection {
   // all queued rows. The tables are cached as well, so e.g. web requests
   // can re-request the same table each time without re-initializing it.
   getTable(config: TableConfig): TableConnection {
-    if (!this.bigQuery) {
-      throw Error("There was an error initializing the BigTable connection.");
+    if (!this.enabled || !this.bigQuery) {
+      return this.noopTable;
     }
 
     const { datasetName, tableName } = config;

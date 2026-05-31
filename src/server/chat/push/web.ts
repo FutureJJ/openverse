@@ -11,12 +11,22 @@ import { zrpcWebSerialize } from "@/shared/zrpc/serde";
 import type { SendResponse } from "firebase-admin/lib/messaging/messaging-api";
 import { zip } from "lodash";
 
+function pushNotificationsEnabled(): boolean {
+  // Push delivery requires Firebase Cloud Messaging credentials. When
+  // FIREBASE_PROJECT_ID is unset (the default for self-hosted Openverse
+  // instances) we silently drop pushes instead of crashing.
+  return !!process.env.FIREBASE_PROJECT_ID;
+}
+
 export async function sendWebPushMessages(
   db: BDB,
   userId: BiomesId,
   mail: Envelope[]
 ) {
   if (mail.length === 0) {
+    return;
+  }
+  if (!pushNotificationsEnabled()) {
     return;
   }
   const tokens = await findAllWebPushTokens(db, userId);
