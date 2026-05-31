@@ -6,8 +6,9 @@
   "context": ".",
   "dockerFile": "Dockerfile",
   "hostRequirements": {
-    "cpus": 8,
-    "memory": "32gb"
+    "cpus": 16,
+    "memory": "64gb",
+    "storage": "128gb"
   },
   "customizations": {
     "vscode": {
