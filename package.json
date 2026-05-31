@@ -1,9 +1,9 @@
 {
-  "name": "biomes-web",
-  "version": "1.0.0",
+  "name": "openverse",
+  "version": "0.1.0",
   "main": "index.js",
-  "repository": "git@github.com:ill-inc/biomes.git",
-  "license": "UNLICENSED",
+  "repository": "git@github.com:FutureJJ/openverse.git",
+  "license": "MIT",
   "private": true,
   "browserslist": [
     "last 2 chrome versions",

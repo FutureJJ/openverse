@@ -7,17 +7,14 @@ interface CloudBucket {
   cdnDomain?: string;
 }
 
+// Cloud-hosted CDN buckets disabled by default in Openverse. Assets are
+// served from local disk (set LOCAL_GCS=1) or you can wire up your own CDN
+// host by setting cdnDomain below.
 export const allCloudBuckets = valueLiteral<CloudBucket>()({
-  "biomes-social": {
-    cdnDomain: "social.biomes.gg",
-  },
+  "biomes-social": { cdnDomain: undefined },
   // Legacy
-  "zones-social": {
-    cdnDomain: "social.biomes.gg",
-  },
-  "biomes-static": {
-    cdnDomain: "static.biomes.gg",
-  },
+  "zones-social": { cdnDomain: undefined },
+  "biomes-static": { cdnDomain: undefined },
   // Where we store user-filed bug report attachment data.
   "report-attachments": { cdnDomain: undefined },
   // Where we store world backups

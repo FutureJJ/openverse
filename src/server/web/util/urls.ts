@@ -82,7 +82,7 @@ export function userPublicPermalink(id: BiomesId, username?: string) {
 }
 
 export function avatarPlaceholderURL() {
-  return "https://static.biomes.gg/public/hud/avatar-placeholder.png";
+  return "/hud/avatar-placeholder.png";
 }
 
 export function extractIdFromEnvironmentGroupURL(

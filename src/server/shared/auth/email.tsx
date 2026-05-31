@@ -24,8 +24,8 @@ export async function sendLoginEmail(email: string, link: string) {
 
   await client.sendEmail({
     To: email,
-    From: "Biomes Login <noreply@biomes.gg>",
-    Subject: "Login to Biomes",
+    From: "Openverse Login <noreply@openverse.local>",
+    Subject: "Login to Openverse",
     HtmlBody: render(<LoginEmail link={link} />, { pretty: true }),
     MessageStream: "outbound",
   });

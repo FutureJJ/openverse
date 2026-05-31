@@ -1,22 +1,29 @@
-# Biomes
+# Openverse
 
-[![](https://dcbadge.vercel.app/api/server/biomes)](https://discord.gg/biomes)
-[![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
+An open-source sandbox MMORPG that runs in your browser. Voxel-building,
+crafting, farming, fishing, quests, and player-to-player trading — all
+streamed in real time over WebSockets, with a fully destructible world
+rendered through WebAssembly and React.
 
-### Overview
+### Stack
 
-Biomes is an open source sandbox MMORPG built for the web using web technologies such as Next.js, Typescript, and WebAssembly. It uses React and reactive paradigms for gameplay.
+- **Frontend**: Next.js + TypeScript + React + WebAssembly (custom voxel engine)
+- **Backend**: Distributed Node.js microservices (web, sync, logic, gaia, anima, ...)
+- **Storage**: Redis (game state, sessions, content)
+- **Build**: Bazel for the C++/Rust voxel core (Galois/voxeloo)
 
-<img width="1393" alt="Biomes screenshot" src="https://github.com/ill-inc/biomes-game/assets/45083086/176ff352-0ecb-4279-9a64-d691f65203b5">
+### Status
 
-[Watch the trailer here!](https://www.youtube.com/watch?v=vPHEtewFm3M)
+Openverse is in active development as a fork of [Biomes](https://github.com/ill-inc/biomes-game).
+Currently being adapted to run independently of Google Cloud (the original
+production backend), so it can be self-hosted on any Linux server.
 
-### Contributing
+### Running locally
 
-- Biomes uses a distributed architecture but can run locally. Get things started by [running the server locally](https://ill-inc.github.io/biomes-game/docs/basics/running-locally).
+Documentation will be published as the self-host port stabilizes. For now
+the original Biomes setup notes mostly apply — see `docs/`.
 
-- If you want to contribute, consider joining our welcoming [developer community on Discord](https://discord.gg/biomes).
+### License
 
-### More
-
-- Visit https://www.biomes.gg or checkout [our official documentation](https://ill-inc.github.io/biomes-game/) for more details.
+MIT. See [LICENSE](LICENSE). Forked from [Biomes](https://github.com/ill-inc/biomes-game)
+© 2023 Global Illumination, Inc., with gratitude for releasing the codebase.

@@ -15,17 +15,16 @@ export const ROBOT_ITEM_SLOTS = 4;
 export const HAND_HARDNESS = 2;
 export const STARTER_AREA_NAME = "The Grove";
 
-export const TWITTER_URL = "http://twitter.com/biomesgg";
-export const PLAYER_PROFILE_URL = "https://forms.gle/3XuzovQxKPVafALQ8";
-export const TWITTER_HANDLE = "biomesgg";
-export const DISCORD_URL = "http://discord.gg/biomes";
-export const GA_MEASUREMENT_ID = "G-RNGQP4NE67";
-export const LINKED_IN_PARTNER_ID = "5054850";
-export const META_PIXEL_ID = "1007561363949312";
-export const TWITTER_PIXEL_ID = "of6mz";
-export const REDDIT_PIXEL_ID = "t2_d04pje156";
-export const SPLASH_CAPTCHA_PUBLIC_SITEKEY =
-  "6LeDGQIgAAAAAE3BD9nS5TYd_WuXQmlAjvup6KL1";
+export const TWITTER_URL = "";
+export const PLAYER_PROFILE_URL = "";
+export const TWITTER_HANDLE = "";
+export const DISCORD_URL = "";
+export const GA_MEASUREMENT_ID = "";
+export const LINKED_IN_PARTNER_ID = "";
+export const META_PIXEL_ID = "";
+export const TWITTER_PIXEL_ID = "";
+export const REDDIT_PIXEL_ID = "";
+export const SPLASH_CAPTCHA_PUBLIC_SITEKEY = "";
 export const MUCKED_THRESHOLD = 1;
 export const CAVE_OCCLUSION_THRESHOLD = 8;
 export const DROP_SCALE = 0.025;
