@@ -23,8 +23,12 @@ export const allCloudBuckets = valueLiteral<CloudBucket>()({
   "biomes-bikkie": { cdnDomain: undefined },
 });
 
+// Self-hosted Openverse defaults to local disk for blob storage. Set
+// USE_GCS=1 (or legacy LOCAL_GCS=0) to opt back into Google Cloud Storage.
 export function useLocalDisk() {
-  return process.env.LOCAL_GCS === "1";
+  if (process.env.USE_GCS === "1") return false;
+  if (process.env.LOCAL_GCS === "0") return false;
+  return true;
 }
 
 export function bucketURL(bucket: string, path: string, useCDN = true) {

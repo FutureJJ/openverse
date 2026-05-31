@@ -1,32 +1,25 @@
-import { log } from "@/shared/logging";
-import { asyncBackoffOnAllErrorsUntilTruthy } from "@/shared/util/retry_helpers";
-import {
-  isAvailable as isOnGce,
-  resetIsAvailableCache as resetIsOnGceCache,
-} from "gcp-metadata";
-
+// In self-hosted Openverse deployments there is no Google Compute Engine
+// metadata service to wait for. The function is kept as a no-op so the
+// existing call sites still work; if you ever run on GCE again, set
+// WAIT_FOR_GCE=1 to restore the original blocking probe.
 export async function waitForAuthReady() {
-  if (
-    process.env.NODE_ENV !== "production" ||
-    process.env.DO_NOT_WAIT_FOR_GCE === "1"
-  ) {
+  if (process.env.WAIT_FOR_GCE !== "1") {
     return;
   }
-  // Check that we're on GCE and wait until so.
+  const { isAvailable, resetIsAvailableCache } = await import("gcp-metadata");
+  const { asyncBackoffOnAllErrorsUntilTruthy } = await import(
+    "@/shared/util/retry_helpers"
+  );
+  const { log } = await import("@/shared/logging");
   log.info("Waiting for GCE metadata service to be available...");
   await asyncBackoffOnAllErrorsUntilTruthy(
     async () => {
-      const onGce = await isOnGce();
+      const onGce = await isAvailable();
       if (!onGce) {
-        // The library caches it, disable that.
-        resetIsOnGceCache();
+        resetIsAvailableCache();
       }
       return onGce;
     },
-    {
-      baseMs: 100,
-      maxMs: 5000,
-      exponent: 1.2,
-    }
+    { baseMs: 100, maxMs: 5000, exponent: 1.2 }
   );
 }

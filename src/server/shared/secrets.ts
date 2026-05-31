@@ -1,9 +1,7 @@
 import { log } from "@/shared/logging";
 import { predictableId } from "@/shared/util/auto_id";
-import type { JSONable } from "@/shared/util/type_helpers";
-import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { ok } from "assert";
-import { entries, keys, zip } from "lodash";
+import { keys } from "lodash";
 
 function Secret<T>() {
   return null as unknown as T;
@@ -54,87 +52,67 @@ export class Secrets {
   }
 }
 
-async function readJSONOrStringSecret(
-  client: SecretManagerServiceClient,
-  secretName: string,
-  version = "latest"
-): Promise<JSONable> {
-  const name = `projects/${
-    process.env.GOOGLE_CLOUD_PROJECT || "zones-cloud"
-  }/secrets/${secretName}/versions/${version}`;
-  const [accessResponse] = await client.accessSecretVersion({ name });
-
-  if (!accessResponse.payload || !accessResponse.payload.data) {
-    throw new Error(`Missing secret '${secretName}`);
-  }
-
-  const stringResult = accessResponse.payload.data.toString();
-  try {
-    return JSON.parse(stringResult) as JSONable;
-  } catch (error) {
-    return stringResult;
-  }
+// Convert "biomes-discord-bot-token" → "BIOMES_DISCORD_BOT_TOKEN"
+function secretToEnvKey(secretName: string): string {
+  return secretName.toUpperCase().replace(/-/g, "_");
 }
 
-async function loadSecretsFromGoogle() {
-  let results!: JSONable[];
-  try {
-    const client = new SecretManagerServiceClient();
+// Critical secrets: if missing in production the server should refuse to
+// start, because using a random value here would silently invalidate every
+// existing session/token. Everything else falls back to a random dev value
+// when not configured (external API features just disable themselves).
+const CRITICAL_SECRETS: SecretKey[] = [
+  "internal-auth-token",
+  "foreign-auth-state",
+  "game-action-permission-token-secret",
+  "untrusted-apply-token",
+];
 
-    results = await Promise.all(
-      entries(ALL_SECRETS).map(([name, _entryVal]) =>
-        readJSONOrStringSecret(client, name)
-      )
-    );
-  } catch (error) {
-    log.error("Cannot connect to Google Secrets", { error });
-    throw error; // Fatal in production.
-  }
+function loadSecretsFromEnv(strict: boolean): Secrets {
+  const fallback = createRandomSecretMap("env-fallback");
+  const missing: string[] = [];
+  const missingCritical: string[] = [];
 
-  const secretMap: Record<string, any> = {};
-  zip(keys(ALL_SECRETS), results).forEach(([secretName, secretVal]) => {
-    secretMap[secretName! as SecretKey] = secretVal!;
-  });
-
-  return new Secrets(secretMap as SecretMap);
-}
-
-async function prepareLocalDevSecrets(...additionalSecretsNeeded: SecretKey[]) {
-  const secretMap = createRandomSecretMap("local-dev");
-  if (additionalSecretsNeeded.length > 0) {
-    try {
-      const client = new SecretManagerServiceClient();
-      const neededSecrets = [...additionalSecretsNeeded];
-      const results = await Promise.all(
-        neededSecrets.map((name) => readJSONOrStringSecret(client, name))
-      );
-      ok(results.length === neededSecrets.length);
-      zip(neededSecrets, results).forEach(([secretName, secretVal]) => {
-        (secretMap as any)[secretName!] = secretVal!;
-      });
-    } catch (error) {
-      log.warn(
-        "Cannot connect to Google secrets, local dev might have trouble connecting to prod",
-        {
-          error,
-        }
-      );
+  for (const name of keys(ALL_SECRETS) as SecretKey[]) {
+    const envKey = secretToEnvKey(name);
+    const value = process.env[envKey];
+    if (value !== undefined && value !== "") {
+      (fallback as any)[name] = value;
+    } else {
+      missing.push(envKey);
+      if (CRITICAL_SECRETS.includes(name)) {
+        missingCritical.push(envKey);
+      }
     }
   }
-  return new Secrets(secretMap);
+
+  if (strict && missingCritical.length > 0) {
+    throw new Error(
+      `Production startup blocked: missing critical secret env vars: ` +
+        `${missingCritical.join(", ")}. Generate values with ` +
+        `\`openssl rand -hex 32\` and set them in your environment.`
+    );
+  }
+
+  if (missing.length > 0) {
+    log.warn(
+      `Optional secrets not set (random fallback used, related features may degrade): ${missing.join(
+        ", "
+      )}`
+    );
+  }
+
+  return new Secrets(fallback);
 }
 
 export async function bootstrapGlobalSecrets(
-  ...additionalSecretsNeeded: SecretKey[]
+  ..._additionalSecretsNeeded: SecretKey[]
 ) {
   if ((global as any)._global_secrets) {
     return; // already set
   }
-  (global as any)._global_secrets =
-    process.env.NODE_ENV === "production" ||
-    process.env.USE_PRODUCTION_SECRETS === "1"
-      ? await loadSecretsFromGoogle()
-      : await prepareLocalDevSecrets(...additionalSecretsNeeded);
+  const strict = process.env.NODE_ENV === "production";
+  (global as any)._global_secrets = loadSecretsFromEnv(strict);
 }
 
 export function getGlobalSecrets() {

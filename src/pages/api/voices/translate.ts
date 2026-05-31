@@ -46,7 +46,7 @@ export default biomesApiHandler(
       }),
     });
     const response = await service.projects.translateText({
-      parent: "projects/zones-cloud",
+      parent: `projects/${process.env.GOOGLE_CLOUD_PROJECT || "openverse-local"}`,
       requestBody: {
         contents: [original],
         mimeType: "text/plain",

@@ -147,5 +147,9 @@ export function observerUrlForSyncTarget(syncTarget: SyncTarget) {
 }
 
 export function googleErrorConsoleURL(userId: BiomesId) {
-  return `https://console.cloud.google.com/logs/query;query=severity%3DERROR%0A%2528jsonPayload.userId%3D${userId}%20OR%20jsonPayload.entityId%3D${userId}%2529;summaryFields=:false:32:beginning?project=zones-cloud`;
+  const project = process.env.GOOGLE_CLOUD_PROJECT;
+  if (!project) {
+    return "";
+  }
+  return `https://console.cloud.google.com/logs/query;query=severity%3DERROR%0A%2528jsonPayload.userId%3D${userId}%20OR%20jsonPayload.entityId%3D${userId}%2529;summaryFields=:false:32:beginning?project=${project}`;
 }
