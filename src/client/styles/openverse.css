@@ -1,0 +1,108 @@
+/* Openverse — clean, minimal sign-in + brand surfaces.
+   Flat dark surface, generous whitespace, a single Solana-green accent. */
+
+.ov-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: min(92vw, 26rem);
+  padding: 3rem 2.5rem;
+  background: #14101f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.ov-brand {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  color: #ffffff;
+}
+
+.ov-tagline {
+  margin-top: -0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+}
+
+.ov-btn {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s ease, opacity 0.15s ease, transform 0.05s ease;
+}
+
+.ov-btn:active {
+  transform: translateY(1px);
+}
+
+.ov-btn-primary {
+  background: #14f195;
+  color: #06130c;
+}
+
+.ov-btn-primary:hover {
+  background: #2dffaa;
+}
+
+.ov-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ov-wallet-chip {
+  width: 100%;
+  text-align: center;
+  padding: 0.65rem;
+  border-radius: 0.75rem;
+  background: rgba(20, 241, 149, 0.08);
+  border: 1px solid rgba(20, 241, 149, 0.22);
+  color: #14f195;
+  font-size: 0.8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.ov-btn-text {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ov-btn-text:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ov-error {
+  width: 100%;
+  text-align: center;
+  padding: 0.65rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  color: #ff8f8f;
+  font-size: 0.8rem;
+}
+
+/* Themed wallet-adapter modal/button to match the flat dark accent. */
+.wallet-adapter-button-trigger {
+  background: #14f195 !important;
+  color: #06130c !important;
+  border-radius: 0.85rem !important;
+  font-weight: 600 !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: #14101f !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.wallet-adapter-modal-title {
+  color: #ffffff !important;
+}

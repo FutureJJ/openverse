@@ -14,6 +14,7 @@ import "@/client/styles/outfit-stand.css";
 import "@/client/styles/social.css";
 import "@/client/styles/splash.css";
 import "@/client/styles/static.css";
+import "@/client/styles/openverse.css";
 import { SolanaWalletProvider } from "@/client/components/solana/SolanaWalletProvider";
 import { useInstallTrackers } from "@/client/util/ad_helpers";
 import { reportFunnelStage } from "@/shared/funnel";

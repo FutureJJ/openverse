@@ -9,11 +9,7 @@ import { getSecret } from "@/server/shared/secrets";
 import { getUserOrCreateIfNotExists } from "@/server/web/db/users";
 import { findByUID } from "@/server/web/db/users_fetch";
 import { okOrAPIError } from "@/server/web/errors";
-import {
-  DoNotSendResponse,
-  biomesApiHandler,
-  zDoNotSendResponse,
-} from "@/server/web/util/api_middleware";
+import { biomesApiHandler } from "@/server/web/util/api_middleware";
 import { APIError } from "@/shared/api/errors";
 import { log } from "@/shared/logging";
 import bs58 from "bs58";
@@ -32,6 +28,9 @@ export const zSolanaVerifyRequest = z.object({
 });
 export type SolanaVerifyRequest = z.infer<typeof zSolanaVerifyRequest>;
 
+export const zSolanaVerifyResponse = z.object({ ok: z.boolean() });
+export type SolanaVerifyResponse = z.infer<typeof zSolanaVerifyResponse>;
+
 function defaultUsernameFor(publicKey: string): string {
   return `Player_${publicKey.slice(0, 4)}${publicKey.slice(-4)}`;
 }
@@ -40,7 +39,7 @@ export default biomesApiHandler(
   {
     auth: "optional",
     body: zSolanaVerifyRequest,
-    response: zDoNotSendResponse,
+    response: zSolanaVerifyResponse,
   },
   async ({
     context,
@@ -105,6 +104,6 @@ export default biomesApiHandler(
     // 4. Issue the session cookie — the player is now logged in.
     const session = await sessionStore.createSession(link.userId);
     setAuthCookies(unsafeResponse, session);
-    return DoNotSendResponse;
+    return { ok: true };
   }
 );
