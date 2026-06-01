@@ -40,6 +40,11 @@ module.exports = {
       "loading-bg": "#473975",
       discord: "#5865F2",
       twitch: "#6441A5",
+      // Openverse / Solana brand palette (LIQUID SOLANA theme)
+      "solana-purple": "#9945FF",
+      "solana-green": "#14F195",
+      "solana-ink": "#0B0817",
+      "solana-ink-2": "#141029",
     },
 
     fontSize: {

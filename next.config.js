@@ -112,6 +112,7 @@ module.exports = withBundleAnalyzer(
         ...config.resolve.fallback,
         assert: require.resolve("assert"),
         async_hooks: false,
+        buffer: require.resolve("buffer/"),
         child_process: false,
         cluster: false,
         constants: false,
@@ -126,6 +127,7 @@ module.exports = withBundleAnalyzer(
         os: false,
         path: false,
         perf_hooks: false,
+        process: require.resolve("process/browser"),
         querystring: require.resolve("querystring-browser"),
         repl: false,
         stream: require.resolve("stream-browserify"),
@@ -133,6 +135,16 @@ module.exports = withBundleAnalyzer(
         v8: false,
         zlib: false,
       };
+      // Solana web3.js / tweetnacl expect Node's Buffer + process globals to
+      // exist in the browser bundle. Provide them so the wallet adapter works.
+      if (!isServer) {
+        config.plugins.push(
+          new webpack.ProvidePlugin({
+            Buffer: ["buffer", "Buffer"],
+            process: "process/browser",
+          })
+        );
+      }
       return config;
     },
 

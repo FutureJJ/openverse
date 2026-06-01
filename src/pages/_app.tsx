@@ -14,8 +14,10 @@ import "@/client/styles/outfit-stand.css";
 import "@/client/styles/social.css";
 import "@/client/styles/splash.css";
 import "@/client/styles/static.css";
+import { SolanaWalletProvider } from "@/client/components/solana/SolanaWalletProvider";
 import { useInstallTrackers } from "@/client/util/ad_helpers";
 import { reportFunnelStage } from "@/shared/funnel";
+import "@solana/wallet-adapter-react-ui/styles.css";
 import "leaflet/dist/leaflet.css";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
@@ -38,5 +40,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     // TODO: Better Server Error Handling.
     return <></>;
   }
-  return <Component {...pageProps} />;
+  return (
+    <SolanaWalletProvider>
+      <Component {...pageProps} />
+    </SolanaWalletProvider>
+  );
 }

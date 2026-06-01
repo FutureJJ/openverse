@@ -7,6 +7,7 @@ import { FailedRequirements } from "@/client/components/login/FailedRequirements
 import { InviteCode } from "@/client/components/login/InviteCode";
 import type { LoginMethod } from "@/client/components/login/LoginMethodPicker";
 import { LoginMethodPicker } from "@/client/components/login/LoginMethodPicker";
+import { SolanaLoginPanel } from "@/client/components/login/SolanaLoginPanel";
 import { useLoginRelatedControllerContext } from "@/client/components/static_site/LoginRelatedControllerContext";
 import { DialogButton } from "@/client/components/system/DialogButton";
 import { MaybeError, useError } from "@/client/components/system/MaybeError";
@@ -361,19 +362,14 @@ export const LoginFlowController: React.FunctionComponent<{
       );
     case "create-or-sign-up":
     case "login":
+      // Openverse authenticates exclusively with a Solana wallet.
+      void LOGIN_METHODS; // legacy provider list retained but unused
+      void LoginMethodPicker;
+      void DialogButton;
       return (
-        <LoginMethodPicker
-          error={error}
-          title={customTitle ?? "Biomes Early Access"}
-          disclaimer={signupDisclaimer}
-          methods={LOGIN_METHODS}
-        >
-          <div>
-            <DialogButton size="marge" onClick={onCancel}>
-              Cancel
-            </DialogButton>
-          </div>
-        </LoginMethodPicker>
+        <div className="flex items-center justify-center">
+          <SolanaLoginPanel onCancel={onCancel} />
+        </div>
       );
 
     case "invite-code":
