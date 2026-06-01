@@ -1,4 +1,5 @@
 import { RootErrorBoundary } from "@/client/components/RootErrorBoundary";
+import SplashPage from "@/pages/splash";
 import Head from "next/head";
 
 export interface BiomesHeadTagProps {
@@ -40,23 +41,11 @@ export default function Index() {
   return (
     <RootErrorBoundary>
       <BiomesHeadTag />
-      <div className="ov-landing">
-        <div className="ov-landing-inner">
-          <div className="ov-landing-brand">OPENVERSE</div>
-          <p className="ov-landing-tagline">
-            A voxel world you own. Build on-chain.
-          </p>
-          <button
-            className="ov-btn ov-btn-primary ov-landing-cta"
-            onClick={() => {
-              window.location.href = "/at";
-            }}
-          >
-            Enter
-          </button>
-          <div className="ov-landing-footer">Powered by Solana</div>
-        </div>
-      </div>
+      <SplashPage
+        onLogin={() => {
+          window.location.href = "/at";
+        }}
+      />
     </RootErrorBoundary>
   );
 }
