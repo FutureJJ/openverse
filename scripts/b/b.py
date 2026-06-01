@@ -914,7 +914,7 @@ TARGET_ALIASES = {
         "logic",
         "chat",
         "map",
-        "gaia_v2",
+        "gaia",
         "web",
         "trigger",
         "task",
