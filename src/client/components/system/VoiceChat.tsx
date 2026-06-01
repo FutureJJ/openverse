@@ -29,17 +29,26 @@ export const VoiceChat: React.FunctionComponent<{
       return;
     }
 
-    const res = await jsonPost<ChatVoiceResponse, ChatVoiceRequest>(
-      "/api/voices/text_to_speech",
-      {
-        text,
-        voice,
-        language,
-      }
-    );
+    // Text-to-speech is optional: it requires an external provider key
+    // (e.g. ElevenLabs). When that isn't configured the endpoint returns an
+    // error, which we swallow so NPC dialogue still works silently.
+    let res: ChatVoiceResponse;
+    try {
+      res = await jsonPost<ChatVoiceResponse, ChatVoiceRequest>(
+        "/api/voices/text_to_speech",
+        {
+          text,
+          voice,
+          language,
+        }
+      );
+    } catch (error) {
+      return;
+    }
     if (
       latestText.current === text &&
       audioRef.current &&
+      res?.url &&
       audioRef.current.src !== res.url
     ) {
       audioRef.current.src = res.url;

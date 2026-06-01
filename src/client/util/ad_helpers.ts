@@ -42,6 +42,10 @@ const TWITTER_PAGE_LOAD_EVENT = "tw-of6mz-of6na";
 function getOrInitTwitterPixel():
   | ((cmd: string, ...args: any[]) => void)
   | undefined {
+  // Openverse: analytics is opt-in. No pixel ID configured => no-op.
+  if (!TWITTER_PIXEL_ID) {
+    return undefined;
+  }
   if (typeof (window as any).twq === "function") {
     (window as any).twq as ((cmd: string, ...args: any[]) => void) | undefined;
   }
@@ -71,6 +75,9 @@ function getOrInitTwitterPixel():
 function getOrInitRedditPixel():
   | ((cmd: string, ...args: any[]) => void)
   | undefined {
+  if (!REDDIT_PIXEL_ID) {
+    return undefined;
+  }
   if (typeof (window as any).rdt === "function") {
     (window as any).rdt as ((cmd: string, ...args: any[]) => void) | undefined;
   }
@@ -103,6 +110,9 @@ function getOrInitRedditPixel():
 
 let fbPixelPromise: Promise<typeof ReactPixel> | undefined;
 function getOrInitFBPixel() {
+  if (!META_PIXEL_ID) {
+    return undefined;
+  }
   if (fbPixelPromise) {
     return fbPixelPromise;
   }
@@ -138,13 +148,15 @@ export function useInstallTrackers() {
 
     const handleRouteChange = (url: string) => {
       // Google
-      ReactGA.set({ page: url });
-      ReactGA.send({
-        hitType: "pageview",
-        page: url,
-      });
+      if (GA_MEASUREMENT_ID) {
+        ReactGA.set({ page: url });
+        ReactGA.send({
+          hitType: "pageview",
+          page: url,
+        });
+      }
 
-      void getOrInitFBPixel().then((pixel) => {
+      void getOrInitFBPixel()?.then((pixel) => {
         pixel.pageView();
       });
 
@@ -154,16 +166,20 @@ export function useInstallTrackers() {
       rdt?.("track", "PageVisit");
     };
 
-    // Google
-    ReactGA.initialize(GA_MEASUREMENT_ID);
-    ReactGA.set({ page: router.pathname });
-    ReactGA.send({
-      hitType: "pageview",
-      page: router.asPath,
-    });
+    // Google (opt-in: only when a measurement ID is configured)
+    if (GA_MEASUREMENT_ID) {
+      ReactGA.initialize(GA_MEASUREMENT_ID);
+      ReactGA.set({ page: router.pathname });
+      ReactGA.send({
+        hitType: "pageview",
+        page: router.asPath,
+      });
+    }
 
     // Linked in
-    LinkedInTag.init(LINKED_IN_PARTNER_ID, "dc");
+    if (LINKED_IN_PARTNER_ID) {
+      LinkedInTag.init(LINKED_IN_PARTNER_ID, "dc");
+    }
 
     // Reddit
     const rdt = getOrInitRedditPixel();
@@ -183,19 +199,21 @@ export function trackConversion(name: keyof typeof CONVERSION_ACTIONS) {
 
   const def = CONVERSION_ACTIONS[name];
 
-  ReactGA.event({
-    category: def.gaCategory ?? "General",
-    action: def.action,
-  });
-
-  if (def.googleAdsSendTo) {
-    ReactGA.gtag("event", def.action, {
-      action: "conversion",
-      category: "Conversion",
-      send_to: def.googleAdsSendTo,
+  if (GA_MEASUREMENT_ID) {
+    ReactGA.event({
+      category: def.gaCategory ?? "General",
+      action: def.action,
     });
+
+    if (def.googleAdsSendTo) {
+      ReactGA.gtag("event", def.action, {
+        action: "conversion",
+        category: "Conversion",
+        send_to: def.googleAdsSendTo,
+      });
+    }
   }
-  if (def.linkedInConversionId) {
+  if (def.linkedInConversionId && LINKED_IN_PARTNER_ID) {
     LinkedInTag.track(def.linkedInConversionId);
   }
   if (def.twitterConversionId) {
@@ -203,7 +221,7 @@ export function trackConversion(name: keyof typeof CONVERSION_ACTIONS) {
     twq?.("event", def.twitterConversionId);
   }
   if (def.facebookPixelEvent) {
-    void getOrInitFBPixel().then((pixel) => {
+    void getOrInitFBPixel()?.then((pixel) => {
       pixel.trackCustom(def.facebookPixelEvent!);
     });
   }

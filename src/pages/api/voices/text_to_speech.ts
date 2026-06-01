@@ -1,5 +1,6 @@
 import { getSecret } from "@/server/shared/secrets";
 import { uploadToBucket } from "@/server/web/cloud_storage/cloud_storage";
+import { bucketURL } from "@/shared/url_types";
 import { okOrAPIError } from "@/server/web/errors";
 import { biomesApiHandler } from "@/server/web/util/api_middleware";
 import { APIError } from "@/shared/api/errors";
@@ -78,7 +79,7 @@ export default biomesApiHandler(
       filename,
       Buffer.from(await response.arrayBuffer())
     );
-    const url = `https://static.biomes.gg/${filename}`;
+    const url = bucketURL("biomes-static", filename);
 
     // Save to cache.
     await db.collection("voices-cache").doc(hash).set({
