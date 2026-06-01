@@ -202,7 +202,20 @@ async function forwardAssetRequest(
     }
   });
 
-  return res.status(status!).send(data);
+  // Never let a redirect from the upstream (or a 301 emitted while in proxy
+  // mode) get permanently cached by the browser. A cached 301 would keep
+  // pointing player asset requests at the remote host even after switching
+  // to local asset generation. Downgrade permanent redirects to temporary
+  // and forbid caching of any redirect.
+  let outStatus = status!;
+  if (outStatus >= 300 && outStatus < 400) {
+    if (outStatus === 301) {
+      outStatus = 302;
+    }
+    res.setHeader("Cache-Control", "no-store");
+  }
+
+  return res.status(outStatus).send(data);
 }
 
 function applyWearableAppearanceFilters(
