@@ -2,12 +2,13 @@ import { resolveAssetUrlUntyped } from "@/galois/interface/asset_paths";
 import assetVersions from "@/galois/interface/gen/asset_versions.json";
 import * as cloud_storage from "@/server/web/cloud_storage/cloud_storage";
 import { absoluteBucketURL } from "@/server/web/util/urls";
+import { localPath, useLocalDisk } from "@/shared/url_types";
 import { log } from "@/shared/logging";
 import { mapAsyncPool } from "@/shared/util/async";
 import { ok } from "assert";
 import * as fs from "fs";
 import fetch from "node-fetch";
-import { dirname, join } from "path";
+import { dirname, join, relative } from "path";
 import * as stream from "stream";
 
 const publicDir = "public";
@@ -18,7 +19,47 @@ function assetPathToLocalPath(x: string) {
   return join(publicDir, x);
 }
 
+// When blob storage is on the local filesystem (self-hosted Openverse, the
+// default), the asset_data the web server serves from public/asset_data is
+// just a different view of the bucket directory. Instead of fetching every
+// file over HTTP (which fails for relative bucket URLs), point public/asset_data
+// at the bucket's asset_data folder with a single symlink.
+function tryLinkLocalAssetData(): boolean {
+  if (!useLocalDisk()) {
+    return false;
+  }
+  // localPath("biomes-static", "asset_data") => .../buckets/biomes-static/asset_data
+  const bucketAssetDir = localPath(assetDataBucketName, "asset_data");
+  if (!fs.existsSync(bucketAssetDir)) {
+    return false;
+  }
+  try {
+    const stat = fs.lstatSync(assetDataDir, { throwIfNoEntry: false });
+    if (stat?.isSymbolicLink()) {
+      return true; // already linked
+    }
+    if (stat) {
+      fs.rmSync(assetDataDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(dirname(assetDataDir), { recursive: true });
+    // Relative symlink so the repo stays relocatable.
+    fs.symlinkSync(relative(dirname(assetDataDir), bucketAssetDir), assetDataDir);
+    log.info(
+      `Linked public/asset_data -> ${bucketAssetDir} (local disk asset store).`
+    );
+    return true;
+  } catch (error) {
+    log.warn("Could not symlink local asset_data, falling back to copy.", {
+      error,
+    });
+    return false;
+  }
+}
+
 export async function ensurePublishedAssetsAreLocal(): Promise<void> {
+  if (tryLinkLocalAssetData()) {
+    return;
+  }
   if (isLocalAssetDataUpToDate()) {
     log.info("Static asset data is locally up-to-date, skipping GCS download.");
     return Promise.resolve();
