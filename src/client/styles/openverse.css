@@ -92,6 +92,58 @@
   font-size: 0.8rem;
 }
 
+/* Landing page — full-bleed flat dark, centered, lots of air. */
+.ov-landing {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+      120% 120% at 50% 0%,
+      #1a1430 0%,
+      #0b0817 60%
+    );
+  color: #fff;
+}
+
+.ov-landing-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.ov-landing-brand {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  line-height: 1;
+}
+
+.ov-landing-tagline {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+}
+
+.ov-landing-cta {
+  width: auto;
+  min-width: 12rem;
+  margin-top: 0.5rem;
+  font-size: 1.05rem;
+  padding: 1rem 2.5rem;
+}
+
+.ov-landing-footer {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(20, 241, 149, 0.6);
+}
+
 /* Themed wallet-adapter modal/button to match the flat dark accent. */
 .wallet-adapter-button-trigger {
   background: #14f195 !important;
